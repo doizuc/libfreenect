@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "libfreenect_sync.h"
+#include "libfreenect_registration.h"
 
 typedef struct buffer_ring {
 	pthread_mutex_t lock;
@@ -323,15 +324,15 @@ static int sync_get(void **data, uint32_t *timestamp, buffer_ring_t *buf)
 }
 
 
-/* 
+/*
   Use this to make sure the runloop is locked and no one is in it. Then you can
   call arbitrary functions from libfreenect.h in a safe way. If the kinect with
-  this index has not been initialized yet, then it will try to set it up. If 
+  this index has not been initialized yet, then it will try to set it up. If
   this function is successful, then you can access kinects[index]. Don't forget
   to unlock the runloop when you're done.
-  
+
   Returns 0 if successful, nonzero if kinect[index] is unvailable
- */ 
+ */
 static int runloop_enter(int index)
 {
 	if (index < 0 || index >= MAX_KINECTS) {
@@ -341,7 +342,7 @@ static int runloop_enter(int index)
 	if (!thread_running || !kinects[index])
 		if (setup_kinect(index, FREENECT_DEPTH_11BIT, 1))
 			return -1;
-		
+
 	pending_runloop_tasks_inc();
 	pthread_mutex_lock(&runloop_lock);
 	return 0;
@@ -383,7 +384,7 @@ int freenect_sync_get_tilt_state(freenect_raw_tilt_state **state, int index)
 {
 	if (runloop_enter(index)) return -1;
 	freenect_update_tilt_state(kinects[index]->dev);
-	*state = freenect_get_tilt_state(kinects[index]->dev);  
+	*state = freenect_get_tilt_state(kinects[index]->dev);
 	runloop_exit();
 	return 0;
 }
@@ -409,3 +410,11 @@ void freenect_sync_stop(void)
 		pthread_join(thread, NULL);
 	}
 }
+
+int freenect_sync_camera_to_world(int cx, int cy, int wz, double* wx, double* wy, int index) {
+  if (runloop_enter(index)) return -1;
+  freenect_camera_to_world(kinects[index]->dev, cx, cy, wz, wx, wy);
+  runloop_exit();
+  return 0;
+}
+

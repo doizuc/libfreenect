@@ -63,7 +63,6 @@ FREENECTAPI_SYNC int freenect_sync_get_video(void **video, uint32_t *timestamp, 
         Nonzero on error.
 */
 
-
 FREENECTAPI_SYNC int freenect_sync_get_depth(void **depth, uint32_t *timestamp, int index, freenect_depth_format fmt);
 /*  Synchronous depth function, starts the runloop if it isn't running
 
@@ -113,6 +112,7 @@ FREENECTAPI_SYNC int freenect_sync_set_led(freenect_led_options led, int index);
         Nonzero on error.
 */
 
+FREENECTAPI_SYNC int freenect_sync_camera_to_world(int cx, int cy, int wz, double* wx, double* wy, int index);
 
 FREENECTAPI_SYNC void freenect_sync_stop(void);
 #ifdef __cplusplus
