@@ -24,6 +24,7 @@
  */
 
 #include "libfreenect.h"
+#include "libfreenect_registration.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -410,3 +411,16 @@ int freenect_update_tilt_state(freenect_device *dev)
 {
 	return 0;
 }
+
+void freenect_camera_to_world(freenect_device* dev,
+    int cx, int cy, int wz, double* wx, double* wy) {
+  double ref_pix_size = 0.1042; //how can I know these two value for my kienct?
+  double ref_distance = 120.0;
+  int DEPTH_X_RES = 640;
+  int DEPTH_Y_RES = 480;
+
+  double factor = 2*ref_pix_size*wz/ref_distance;
+  *wx = (double)(cx - DEPTH_X_RES/2)*factor;
+  *wy = (double)(cy - DEPTH_Y_RES/2)*factor;
+}
+
